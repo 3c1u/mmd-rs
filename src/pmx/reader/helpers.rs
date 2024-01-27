@@ -1,8 +1,7 @@
 use crate::{pmx::types::*, Error, Result};
 use byteorder::{ReadBytesExt, LE};
-use encoding::all::{UTF_16LE, UTF_8};
-use encoding::{DecoderTrap, Encoding};
-use std::io::Read;
+use encoding_rs::{UTF_16LE, UTF_8};
+use std::{borrow::Cow, io::Read};
 
 pub(crate) trait ReadHelpers: Read {
   fn read_text(&mut self, encoding: TextEncoding) -> Result<String> {
@@ -10,11 +9,17 @@ pub(crate) trait ReadHelpers: Read {
     let mut buf = Vec::with_capacity(size as usize);
     buf.resize(size as usize, 0u8);
     self.read_exact(&mut buf)?;
-    (match encoding {
-      TextEncoding::UTF8 => UTF_8.decode(&buf, DecoderTrap::Strict),
-      TextEncoding::UTF16LE => UTF_16LE.decode(&buf, DecoderTrap::Strict),
-    })
-    .map_err(|e| Error::DecodeText(e))
+
+    let (res, _encoding, is_malformed) = match encoding {
+      TextEncoding::UTF8 => UTF_8.decode(&buf),
+      TextEncoding::UTF16LE => UTF_16LE.decode(&buf),
+    };
+
+    if is_malformed {
+      return Err(Error::DecodeText(Cow::Borrowed("malformed text")));
+    }
+
+    Ok(res.to_string())
   }
 
   fn read_vec2<C: Config>(&mut self) -> Result<C::Vec2> {
