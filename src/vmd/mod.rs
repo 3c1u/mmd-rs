@@ -12,12 +12,32 @@ pub struct VmdHeader {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Frame {
+pub struct MotionFrame {
   pub name: String,
   pub frame_no: u32,
   pub position: [f32; 3],
   pub rotation: [f32; 4],
   pub interpolation: [u8; 64],
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SkinFrame {
+  pub unknown: [u8; 23]
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CameraFrame {
+  pub unknown: [u8; 61]
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LightFrame {
+  pub unknown: [u8; 28]
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ShadowFrame {
+  pub unknown: [u8; 9]
 }
 
 fn read_string<R: Read>(read: &mut R, size: usize) -> crate::Result<String> {
@@ -68,14 +88,14 @@ impl VmdHeader {
   }
 }
 
-impl Frame {
+impl MotionFrame {
   pub fn read_all<R: Read>(read: &mut R) -> crate::Result<Vec<Self>> {
     let total_frames = read.read_u32::<LE>()?;
 
     let mut frames = Vec::with_capacity(total_frames as usize);
 
     for _ in 0..total_frames {
-      frames.push(Frame::read(read)?);
+      frames.push(Self::read(read)?);
     }
 
     Ok(frames)
@@ -93,13 +113,109 @@ impl Frame {
       buf
     };
 
-    Ok(Frame {
+    Ok(Self {
       name,
       frame_no,
       position,
       rotation,
       interpolation,
     })
+  }
+}
+
+impl SkinFrame {
+  pub fn read_all<R: Read>(read: &mut R) -> crate::Result<Vec<Self>> {
+    let total_frames = read.read_u32::<LE>()?;
+
+    let mut frames = Vec::with_capacity(total_frames as usize);
+
+    for _ in 0..total_frames {
+      frames.push(Self::read(read)?);
+    }
+
+    Ok(frames)
+  }
+
+  pub fn read<R: Read>(read: &mut R) -> crate::Result<Self> {
+    let unknown = {
+      let mut buf = [0; 23];
+      read.read_exact(&mut buf)?;
+      buf
+    };
+
+    Ok(Self { unknown })
+  }
+}
+
+impl CameraFrame {
+  pub fn read_all<R: Read>(read: &mut R) -> crate::Result<Vec<Self>> {
+    let total_frames = read.read_u32::<LE>()?;
+
+    let mut frames = Vec::with_capacity(total_frames as usize);
+
+    for _ in 0..total_frames {
+      frames.push(Self::read(read)?);
+    }
+
+    Ok(frames)
+  }
+
+  pub fn read<R: Read>(read: &mut R) -> crate::Result<Self> {
+    let unknown = {
+      let mut buf = [0; 61];
+      read.read_exact(&mut buf)?;
+      buf
+    };
+
+    Ok(Self { unknown })
+  }
+}
+
+impl LightFrame {
+  pub fn read_all<R: Read>(read: &mut R) -> crate::Result<Vec<Self>> {
+    let total_frames = read.read_u32::<LE>()?;
+
+    let mut frames = Vec::with_capacity(total_frames as usize);
+
+    for _ in 0..total_frames {
+      frames.push(Self::read(read)?);
+    }
+
+    Ok(frames)
+  }
+
+  pub fn read<R: Read>(read: &mut R) -> crate::Result<Self> {
+    let unknown = {
+      let mut buf = [0; 28];
+      read.read_exact(&mut buf)?;
+      buf
+    };
+
+    Ok(Self { unknown })
+  }
+}
+
+impl ShadowFrame {
+  pub fn read_all<R: Read>(read: &mut R) -> crate::Result<Vec<Self>> {
+    let total_frames = read.read_u32::<LE>()?;
+
+    let mut frames = Vec::with_capacity(total_frames as usize);
+
+    for _ in 0..total_frames {
+      frames.push(Self::read(read)?);
+    }
+
+    Ok(frames)
+  }
+
+  pub fn read<R: Read>(read: &mut R) -> crate::Result<Self> {
+    let unknown = {
+      let mut buf = [0; 9];
+      read.read_exact(&mut buf)?;
+      buf
+    };
+
+    Ok(Self { unknown })
   }
 }
 
@@ -134,7 +250,7 @@ mod tests {
     let mut cursor = std::io::Cursor::new(FIXTURE_MOTION_VMD);
     super::VmdHeader::read(&mut cursor).unwrap();
 
-    let frame = super::Frame::read_all(&mut cursor).unwrap();
+    let frame = super::MotionFrame::read_all(&mut cursor).unwrap();
 
     assert_eq!(frame.len(), 164);
     assert_eq!(frame[0].name, "センター");
@@ -146,7 +262,7 @@ mod tests {
     let mut cursor = std::io::Cursor::new(FIXTURE_CAMERA_VMD);
     super::VmdHeader::read(&mut cursor).unwrap();
 
-    let frame = super::Frame::read_all(&mut cursor).unwrap();
+    let frame = super::MotionFrame::read_all(&mut cursor).unwrap();
 
     assert_eq!(frame.len(), 0);
   }
@@ -156,7 +272,7 @@ mod tests {
     let mut cursor = std::io::Cursor::new(FIXTURE_ISSUE1_VMD);
     super::VmdHeader::read(&mut cursor).unwrap();
 
-    let frame = super::Frame::read_all(&mut cursor).unwrap();
+    let frame = super::MotionFrame::read_all(&mut cursor).unwrap();
 
     assert_eq!(frame.len(), 7);
     assert_eq!(frame[0].name, "左目");
