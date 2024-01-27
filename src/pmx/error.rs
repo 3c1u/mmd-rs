@@ -3,6 +3,8 @@ use std::borrow::Cow;
 
 #[derive(Debug, Error)]
 pub enum Error {
+  #[error(display = "Invalid header")]
+  InvalidHeader,
   #[error(display = "{}", _0)]
   Io(#[error(source)] std::io::Error),
   #[error(display = "Wrong signature {:?}", _0)]
