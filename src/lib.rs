@@ -1,6 +1,7 @@
 #![deny(warnings)]
 
 pub mod pmx;
+pub mod vmd;
 
 pub use self::pmx::bone::Bone;
 pub use self::pmx::error::{Error, Result};

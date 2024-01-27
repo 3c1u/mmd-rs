@@ -1,10 +1,11 @@
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 use itertools::Itertools;
 use std::fmt::{Debug, Display, Formatter};
 
 use crate::{display::DisplayOption, Config};
 
-#[derive(BitFlags, Copy, Clone, PartialEq, Debug)]
+#[bitflags]
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(u16)]
 pub enum BoneFlags {
   Connection = 0b0000_0000_0000_0001,

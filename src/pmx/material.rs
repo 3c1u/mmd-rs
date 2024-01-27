@@ -1,10 +1,11 @@
 use crate::{Config, Error};
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 use itertools::Itertools;
 use std::convert::TryFrom;
 use std::fmt::{Debug, Display, Formatter};
 
-#[derive(BitFlags, Copy, Clone, PartialEq, Debug)]
+#[bitflags]
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(u8)]
 pub enum DrawingFlags {
   NoCull = 0b00000001,

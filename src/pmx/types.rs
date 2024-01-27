@@ -109,7 +109,7 @@ impl Config for DefaultConfig {
   type Vec4 = [f32; 4];
 
   #[cfg(feature = "arrayvec")]
-  type AdditionalVec4s = ArrayVec<[Self::Vec4; 4]>;
+  type AdditionalVec4s = ArrayVec<Self::Vec4, 4>;
   #[cfg(not(feature = "arrayvec"))]
   type AdditionalVec4s = Vec<Self::Vec4>;
 }
