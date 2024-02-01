@@ -2,6 +2,7 @@
 
 pub mod pmx;
 pub mod vmd;
+pub mod vpd;
 
 pub use self::pmx::bone::Bone;
 pub use self::pmx::error::{Error, Result};
